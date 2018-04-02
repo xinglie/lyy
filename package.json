@@ -1,0 +1,34 @@
+{
+  "name": "lyy",
+  "version": "1.0.0",
+  "description": "match practice",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinglie/lyy.git"
+  },
+  "keywords": [
+    "xinglie",
+    "magix",
+    "math",
+    "practice"
+  ],
+  "author": "xinglie.lkf@taobao.com",
+  "license": "MIT",
+  "dependencies": {
+    "del": "",
+    "gulp": "",
+    "typescript": "",
+    "gulp-watch": "",
+    "gulp-uglify": ""
+  },
+  "bugs": {
+    "url": "https://github.com/xinglie/lyy/issues"
+  },
+  "homepage": "https://github.com/xinglie/lyy#readme",
+  "scripts": {
+    "combine": "npm install;gulp combine",
+    "watch": "npm install;gulp watch",
+    "build": "npm install;gulp build"
+  }
+}
