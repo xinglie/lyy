@@ -10,7 +10,7 @@ module.exports = Magix.View.extend({
             n: 1
         });
     },
-    getExpr() {
+    '@{getExpr}'() {
         let n = this.updater.get('n');
         let operate, answers = [], answer;
         let left, right, n_max = N_LIST[n];
@@ -21,7 +21,7 @@ module.exports = Magix.View.extend({
         if (left + right <= n_max && Math.random() < 0.9) {
             answer = left + right;
             operate = '+';
-            let start = Math.min(answer, answer + 2);
+            let start = Math.min(n_max, answer + 2);
             if (start < 3) start = 3;
             do {
                 answers.push(start--);
@@ -50,22 +50,49 @@ module.exports = Magix.View.extend({
             userAnswer: -1
         }
     },
-    getGroup(count) {
+    '@{getGroup}'(count) {
         let group = [];
-        for (let i = 0; i < count; i++) {
-            group.push(this.getExpr());
+        let locker = {};
+        let i = 0, e, key;
+        let n = this.updater.get('n');
+        let n_max = N_LIST[n], left, right;
+        let minCount = 0, zeroCount = 0;
+        while (i < count) {
+            e = this['@{getExpr}']();
+            left = Math.min(e.left, e.right);
+            right = Math.max(e.left, e.right);
+            key = `${left}\x1e${right}\x1e${e.operate}`;
+            if (Math.abs(left - right) < 4) {
+                if (minCount > 2) {
+                    locker[key] = 1;
+                }
+                minCount++;
+            }
+            if (e.operate == '-' && left == right) {
+                if (zeroCount) {
+                    locker[key] = 1;
+                }
+                zeroCount++;
+            }
+            if (!locker[key]) {
+                locker[key] = 1;
+                i++;
+                group.push(e);
+            } else {
+                console.log('warn: same' + key);
+            }
         }
         return group;
     },
     render() {
-        let group = this.getGroup(20);
+        let group = this['@{getGroup}'](20);
         this.updater.digest({
             nList: N_LIST,
             group,
             current: 0
         });
     },
-    changeExpr(index) {
+    '@{changeExpr}'(index) {
         clearTimeout(this['@{next.timer}']);
         this.updater.digest({
             current: index
@@ -88,26 +115,26 @@ module.exports = Magix.View.extend({
                         expr = group[++current];
                     } while (expr && expr.userAnswer !== -1);
                     if (expr && expr.userAnswer === -1) {
-                        this.changeExpr(current);
+                        this['@{changeExpr}'](current);
                     }
                 }, 1e3);
             }
         }
     },
     '@{show}<click>'(e) {
-        this.changeExpr(e.params.index);
+        this['@{changeExpr}'](e.params.index);
     },
     '@{prev}<click>'() {
         let current = this.updater.get('current');
         if (current > 0) {
-            this.changeExpr(current - 1);
+            this['@{changeExpr}'](current - 1);
         }
     },
     '@{next}<click>'() {
         let group = this.updater.get('group');
         let current = this.updater.get('current');
         if (current < group.length - 1) {
-            this.changeExpr(current + 1);
+            this['@{changeExpr}'](current + 1);
         }
     },
     '@{group}<click>'() {

@@ -13,6 +13,7 @@ var del = require('del');
 
 combineTool.config({
     magixUpdaterIncrement: true,
+    magixUpdaterQuick: true,
     tmplFolder: tmplFolder,
     srcFolder: srcFolder,
     cssSelectorPrefix: 'yy-',
@@ -21,7 +22,6 @@ combineTool.config({
             compilerOptions: {
                 lib: ['es7'],
                 target: 'es3',
-                jsx: true,
                 module: ts.ModuleKind.CommonJS
             }
         });
