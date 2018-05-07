@@ -1,13 +1,13 @@
 //#snippet;
 //#uncheck = jsThis,jsLoop;
 //#exclude = loader,allProcessor;
-/*!3.8.9 Licensed MIT*/
+/*!3.8.10 Licensed MIT*/
 /*
 author:kooboy_li@163.com
 loader:cmd
 enables:style,naked,updater,updaterVDOM,updaterQuick,mini
 
-optionals:base,updaterDOM,updaterAsync,service,serviceCombine,router,tipRouter,tipLockUrlRouter,edgeRouter,forceEdgeRouter,urlRewriteRouter,updateTitleRouter,state,cnum,ceach,collectView,layerVframe,viewProtoMixins,viewSlot,share,defaultView,autoEndUpdate,linkage,viewInit,resource,configIni,nodeAttachVframe,mxViewAttr,viewMerge,keepHTML,eventEnterLeave,vdom
+optionals:base,updaterDOM,updaterAsync,service,serviceCombine,router,tipRouter,tipLockUrlRouter,edgeRouter,forceEdgeRouter,urlRewriteRouter,updateTitleRouter,state,cnum,ceach,collectView,layerVframe,viewProtoMixins,viewSlot,share,defaultView,linkage,viewInit,resource,configIni,nodeAttachVframe,mxViewAttr,viewMerge,keepHTML,eventEnterLeave,vdom
 */
 define('magix', function (require) {
     if (typeof DEBUG == 'undefined')
@@ -925,7 +925,7 @@ define('magix', function (require) {
         me['$c'] = {}; //childrenMap
         me['$cc'] = 0; //childrenCount
         me['$rc'] = 0; //readyCount
-        me['$e'] = 1; //signature
+        me['$e'] = me['$e'] || 1; //signature
         me['$d'] = {}; //readyMap
         me.pId = pId;
         Vframe_AddVframe(id, me);
@@ -1028,6 +1028,12 @@ define('magix', function (require) {
                         me['$v'] = view;
                         View_DelegateEvents(view);
                         view['$d']();
+                        if (!view['$e']) { //无模板
+                            me['$f'] = 0; //不会修改节点，因此销毁时不还原
+                            if (!view['$f']) {
+                                view.endUpdate();
+                            }
+                        }
                     }
                 });
             }
@@ -1518,7 +1524,6 @@ define('magix', function (require) {
                     else if (value === true) {
                         value = G_EMPTY;
                     }
-                    value = value || G_EMPTY;
                     if (prop == 'id') { //如果有id优先使用
                         compareKey = value;
                     }
@@ -1792,7 +1797,7 @@ define('magix', function (require) {
             realNode.innerHTML = newVDOM['g'];
         }
     };
-    var V_SetNode = function (realNode, oldParent, lastVDOM, newVDOM, ref, vframe, keys) {
+    var V_SetNode = function (realNode, oldParent, lastVDOM, newVDOM, ref, vframe, keys, hasMXV) {
         if (DEBUG) {
             if (oldParent.nodeName == 'TEMPLATE') {
                 console.error('unsupport template tag');
@@ -1803,7 +1808,7 @@ define('magix', function (require) {
         }
         var lastAMap = lastVDOM['j'], newAMap = newVDOM['j'];
         if (V_SpecialDiff(realNode, lastVDOM, newVDOM) ||
-            G_Has(lastAMap, G_Tag_View_Key) ||
+            (hasMXV = G_Has(lastAMap, G_Tag_View_Key)) ||
             lastVDOM['c'] != newVDOM['c']) {
             if (lastVDOM['f'] == newVDOM['f']) {
                 if (lastVDOM['f'] == V_TEXT_NODE) {
@@ -1814,8 +1819,7 @@ define('magix', function (require) {
                 }
                 else if (!lastAMap[G_Tag_Key] || lastAMap[G_Tag_Key] != newAMap[G_Tag_Key]) {
                     var newMxView = newAMap[G_MX_VIEW], newHTML = newVDOM['g'];
-                    var updateAttribute = !newAMap[G_Tag_Attr_Key] || lastAMap[G_Tag_Attr_Key] != newAMap[G_Tag_Attr_Key], updateChildren = void 0, unmountOld = void 0, oldVf = Vframe_Vframes[realNode.id], assign = void 0, view = void 0, uri = newMxView && G_ParseUri(newMxView), params = void 0, htmlChanged = void 0, paramsChanged = void 0 /*,
-                    oldDataStringify, newDataStringify,dataChanged*/;
+                    var updateAttribute = !newAMap[G_Tag_Attr_Key] || lastAMap[G_Tag_Attr_Key] != newAMap[G_Tag_Attr_Key], updateChildren = void 0, unmountOld = void 0, oldVf = Vframe_Vframes[realNode.id], assign = void 0, view = void 0, uri = newMxView && G_ParseUri(newMxView), params = void 0, htmlChanged = void 0, deep = void 0, paramsChanged = void 0;
                     /*
                         如果存在新旧view，则考虑路径一致，避免渲染的问题
                      */
@@ -1833,6 +1837,7 @@ define('magix', function (require) {
                         htmlChanged = newHTML != lastVDOM['g'];
                         paramsChanged = newMxView != oldVf[G_PATH];
                         assign = lastAMap[G_Tag_View_Key];
+                        deep = !view['$e'];
                         if (!htmlChanged && !paramsChanged && assign) {
                             params = assign.split(G_COMMA);
                             for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
@@ -1843,8 +1848,8 @@ define('magix', function (require) {
                                 }
                             }
                         }
-                        if (paramsChanged || htmlChanged) {
-                            assign = view['$f'];
+                        if (paramsChanged || htmlChanged || (deep && hasMXV)) {
+                            assign = view['$g'];
                             //如果有assign方法,且有参数或html变化
                             if (assign) {
                                 params = uri[G_PARAMS];
@@ -1857,7 +1862,8 @@ define('magix', function (require) {
                                 uri = {
                                     node: newVDOM,
                                     html: newHTML,
-                                    deep: !view['$e'],
+                                    mxv: hasMXV,
+                                    deep: deep,
                                     inner: htmlChanged,
                                     query: paramsChanged,
                                     keys: keys
@@ -1939,7 +1945,7 @@ define('magix', function (require) {
                 vdom = _c[_b];
                 vdom['$d']();
             }
-            if (ref.c || !view['$g']) {
+            if (ref.c || !view['$f']) {
                 view.endUpdate(selfId);
             }
             console.timeEnd('[updater time:' + selfId + ']');
@@ -2222,7 +2228,7 @@ define('magix', function (require) {
             prop['$el'] = eventsList;
             prop['$so'] = selectorObject;
             prop['$e'] = prop.tmpl;
-            prop['$f'] = prop.assign;
+            prop['$g'] = prop.assign;
         }
     };
     /**
@@ -2374,7 +2380,7 @@ define('magix', function (require) {
          */
         beginUpdate: function (id, me) {
             me = this;
-            if (me['$b'] > 0 && me['$g']) {
+            if (me['$b'] > 0 && me['$f']) {
                 me.owner.unmountZone(id, 1);
                 /*me.fire('prerender', {
                     id: id
@@ -2396,7 +2402,7 @@ define('magix', function (require) {
                     f = inner;
                 }
                 else {
-                    me['$g'] = 1;
+                    me['$f'] = 1;
                 }
                 me.owner.mountZone(id, inner);
             }
