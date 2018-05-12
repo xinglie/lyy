@@ -31,7 +31,7 @@ define('magix', function (require) {
     var G_Tag_Attr_Key = 'mxa';
     var G_Tag_View_Key = 'mxv';
     var G_HashKey = '#';
-    var G_NOOP = function () { };
+    function G_NOOP() { }
     var JSONStringify = JSON.stringify;
     var G_DOCBODY; //initilize at vframe_root
     /*
@@ -81,12 +81,12 @@ define('magix', function (require) {
                 try {
                     r = (b.compareDocumentPosition(a) & 16) == 16;
                 }
-                catch (e) { }
+                catch (_magix) { }
             }
         }
         return r;
     };
-    var G_Assign = function (t) {
+    function G_Assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
             s = arguments[i];
             for (var p in s)
@@ -94,7 +94,7 @@ define('magix', function (require) {
                     t[p] = s[p];
         }
         return t;
-    };
+    }
     var Magix_HasProp = Magix_Cfg.hasOwnProperty;
     var Header = document.head;
     var Temp = document.createElement('div');
@@ -175,13 +175,13 @@ define('magix', function (require) {
      * c.has('key1');//判断
      * //注意：缓存通常配合其它方法使用，在Magix中，对路径的解析等使用了缓存。在使用缓存优化性能时，可以达到节省CPU和内存的双赢效果
      */
-    var G_Cache = function (max, buffer, remove, me) {
+    function G_Cache(max, buffer, remove, me) {
         me = this;
         me.c = [];
         me.b = buffer || 5; //buffer先取整，如果为0则再默认5
         me.x = me.b + (max || 20);
         me.r = remove;
-    };
+    }
     G_Assign(G_Cache[G_PROTOTYPE], {
         /**
          * @lends Cache#
@@ -295,7 +295,7 @@ define('magix', function (require) {
             fn();
         }
     };
-    var T = function () { };
+    function T() { }
     var G_Extend = function (ctor, base, props, statics, cProto) {
         //bProto.constructor = base;
         T[G_PROTOTYPE] = base[G_PROTOTYPE];
@@ -463,7 +463,7 @@ define('magix', function (require) {
         try {
             value = decodeURIComponent(value);
         }
-        catch (e) {
+        catch (_magix) {
         }
         Magix_ParamsObjectTemp[name] = value;
     };
@@ -908,7 +908,7 @@ define('magix', function (require) {
      * @property {String} path 当前view的路径名，包括参数
      * @property {String} pId 父vframe的id，如果是根节点则为undefined
      */
-    var Vframe = function (id, pId, me) {
+    function Vframe(id, pId, me) {
         me = this;
         me.id = id;
         if (DEBUG) {
@@ -929,7 +929,7 @@ define('magix', function (require) {
         me['$d'] = {}; //readyMap
         me.pId = pId;
         Vframe_AddVframe(id, me);
-    };
+    }
     G_Assign(Vframe, {
         /**
          * @lends Vframe
@@ -984,10 +984,10 @@ define('magix', function (require) {
             }
             me.unmountView( /*keepPreHTML*/);
             me['$a'] = 0; //destroyed 详见unmountView
-            if (node && viewPath) {
+            po = G_ParseUri(viewPath);
+            view = po[G_PATH];
+            if (node && view) {
                 me[G_PATH] = viewPath;
-                po = G_ParseUri(viewPath);
-                view = po[G_PATH];
                 sign = ++s;
                 params = po[G_PARAMS];
                 parentVf = Vframe_TranslateQuery(pId, viewPath, params);
@@ -1506,19 +1506,49 @@ define('magix', function (require) {
             Body_SearchSelectorEvents[type] = (Body_SearchSelectorEvents[type] | 0) + offset;
         }
     };
+    var Q_EM = {
+        '&': 'amp',
+        '<': 'lt',
+        '>': 'gt',
+        '"': '#34',
+        '\'': '#39',
+        '\`': '#96'
+    };
+    var Q_ER = /[&<>"'\`]/g;
+    var Q_Safeguard = function (v) { return '' + (v == null ? '' : v); };
+    var Q_EncodeReplacer = function (m) { return "&" + Q_EM[m] + ";"; };
+    var Q_Encode = function (v) { return Q_Safeguard(v).replace(Q_ER, Q_EncodeReplacer); };
+    var Q_Ref = function ($$, v, k, f) {
+        for (f = $$[G_SPLITER]; --f;)
+            if ($$[k = G_SPLITER + f] === v)
+                return k;
+        $$[k = G_SPLITER + $$[G_SPLITER]++] = v;
+        return k;
+    };
+    var Q_UM = {
+        '!': '%21',
+        '\'': '%27',
+        '(': '%28',
+        ')': '%29',
+        '*': '%2A'
+    };
+    var Q_URIReplacer = function (m) { return Q_UM[m]; };
+    var Q_URIReg = /[!')(*]/g;
+    var Q_EncodeURI = function (v) { return encodeURIComponent(Q_Safeguard(v)).replace(Q_URIReg, Q_URIReplacer); };
+    var Q_QR = /[\\'"]/g;
+    var Q_EncodeQ = function (v) { return Q_Safeguard(v).replace(Q_QR, '\\$&'); };
     var Q_Create = function (tag, children, props, unary) {
         //html=tag+to_array(attrs)+children.html
         var token;
         if (tag) {
             var attrs = [];
             var amap = {};
-            var compareKey = G_EMPTY, hasMxv = void 0, diffChildren = void 0;
-            var prop = void 0, value = void 0, c = void 0, reused = {}, outerHTML = '<' + tag, innerHTML = '';
+            var compareKey = G_EMPTY, hasMxv = void 0, diffChildren = void 0, prop = void 0, value = void 0, c = void 0, reused = {}, outerHTML = '<' + tag, innerHTML = G_EMPTY, newChildren = [], prevNode = void 0;
             if (props) {
                 for (prop in props) {
                     value = props[prop];
                     //布尔值
-                    if (value === false) {
+                    if (value === false || value == G_NULL) {
                         continue;
                     }
                     else if (value === true) {
@@ -1542,7 +1572,7 @@ define('magix', function (require) {
                         'b': value
                     });
                     amap[prop] = value;
-                    outerHTML += ' ' + prop + '="' + value + '"';
+                    outerHTML += " " + prop + "=\"" + value + "\"";
                 }
             }
             if (unary) {
@@ -1554,34 +1584,48 @@ define('magix', function (require) {
                     for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
                         c = children_1[_i];
                         innerHTML += c['c'];
-                        if (c['d']) {
-                            reused[c['d']] = 1;
+                        //merge text node
+                        if (prevNode &&
+                            c['d'] == V_TEXT_NODE &&
+                            prevNode['d'] == c['d']) {
+                            //prevNode['e'] += c['e'];
+                            prevNode['c'] += c['c'];
                         }
-                        if (c['e'] || V_SPECIAL_PROPS[c['f']]) {
-                            diffChildren = 1;
+                        else {
+                            //reused node if new node key equal old node key
+                            if (c['f']) {
+                                reused[c['f']] = 1;
+                            }
+                            //force diff children
+                            if (c['g'] ||
+                                V_SPECIAL_PROPS[c['d']]) {
+                                diffChildren = 1;
+                            }
+                            prevNode = c;
+                            newChildren.push(c);
                         }
                     }
                 }
-                outerHTML += innerHTML + '</' + tag + '>';
+                outerHTML += innerHTML + ("</" + tag + ">");
             }
             token = {
                 'c': outerHTML,
-                'g': innerHTML,
-                'd': compareKey,
-                'f': tag,
-                'e': hasMxv,
+                'e': innerHTML,
+                'f': compareKey,
+                'd': tag,
+                'g': hasMxv,
                 'h': diffChildren,
                 'i': attrs,
                 'j': amap,
-                'k': innerHTML ? children : [],
+                'k': newChildren,
                 'l': reused,
                 'm': unary
             };
         }
         else {
             token = {
-                'f': V_TEXT_NODE,
-                'g': children,
+                'd': V_TEXT_NODE,
+                //'e': children,
                 'c': children
             };
         }
@@ -1616,7 +1660,10 @@ define('magix', function (require) {
             vf.unmountZone(id, 1);
         }
     };
-    var V_SVGNS = 'http://www.w3.org/2000/svg';
+    var V_NSMap = {
+        svg: 'http://www.w3.org/2000/svg',
+        math: 'http://www.w3.org/1998/Math/MathML'
+    };
     var V_SetAttributes = function (oldNode, lastVDOM, newVDOM, ref) {
         var c, key, value, nMap = newVDOM['j'];
         if (lastVDOM) {
@@ -1652,7 +1699,7 @@ define('magix', function (require) {
         }
     };
     var V_SpecialDiff = function (oldNode, lastVDOM, newVDOM) {
-        var tag = lastVDOM['f'], c, now;
+        var tag = lastVDOM['d'], c, now;
         var specials = V_SPECIAL_PROPS[tag];
         var nMap = newVDOM['j'];
         var result = 0;
@@ -1669,14 +1716,14 @@ define('magix', function (require) {
         return result;
     };
     var V_CreateNode = function (vnode, owner, ref, c, tag) {
-        tag = vnode['f'];
+        tag = vnode['d'];
         if (tag == V_TEXT_NODE) {
-            return G_DOCUMENT.createTextNode(vnode['g']);
+            return G_DOCUMENT.createTextNode(vnode['c']);
         }
-        c = G_DOCUMENT.createElementNS(tag == 'svg' ? V_SVGNS : owner.namespaceURI, tag);
+        c = G_DOCUMENT.createElementNS(V_NSMap[tag] || owner.namespaceURI, tag);
         V_SetAttributes(c, 0, vnode, ref);
-        if (vnode['g']) {
-            c.innerHTML = vnode['g'];
+        if (vnode['e']) {
+            c.innerHTML = vnode['e'];
         }
         return c;
     };
@@ -1684,7 +1731,7 @@ define('magix', function (require) {
         var keyed = {}, i = end, v, key;
         for (; i >= start; i--) {
             v = vnodes[i];
-            key = v['d'];
+            key = v['f'];
             if (key) {
                 key = keyed[key] || (keyed[key] = []);
                 key.push({
@@ -1698,11 +1745,11 @@ define('magix', function (require) {
     var V_SetChildNodes = function (realNode, lastVDOM, newVDOM, ref, vframe, keys) {
         if (lastVDOM) { //view首次初始化，通过innerHTML快速更新
             if (lastVDOM['h'] ||
-                lastVDOM['g'] != newVDOM['g']) {
+                lastVDOM['e'] != newVDOM['e']) {
                 var i = void 0, oi = 0, oldChildren = lastVDOM['k'], newChildren = newVDOM['k'], oc = void 0, nc = void 0, oldCount = oldChildren.length, newCount = newChildren.length, reused = newVDOM['l'], nodes = realNode.childNodes, compareKey = void 0, orn = void 0, ovn = void 0, keyedNodes = {};
                 for (i = oldCount; i--;) {
                     oc = oldChildren[i];
-                    compareKey = oc['d'];
+                    compareKey = oc['f'];
                     if (compareKey) {
                         compareKey = keyedNodes[compareKey] || (keyedNodes[compareKey] = []);
                         compareKey.push({
@@ -1721,11 +1768,11 @@ define('magix', function (require) {
                      newEndVNode = newChildren[newEndIdx];
          
                  while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-                     if (newStartVNode['d'] == oldStartVNode['d']) {
+                     if (newStartVNode['f'] == oldStartVNode['f']) {
                          V_SetNode(nodes[newStartIdx], realNode, oldStartVNode, newStartVNode, ref, vframe, data);
                          newStartVNode = newChildren[++newStartIdx];
                          oldStartVNode = oldChildren[++oldStartIdx];
-                     } else if (newEndVNode['d'] == oldEndVNode['d']) {
+                     } else if (newEndVNode['f'] == oldEndVNode['f']) {
                          V_SetNode(nodes[newEndIdx], realNode, oldEndVNode, newEndVNode, ref, vframe, data);
                          newEndVNode = newChildren[--newEndIdx];
                          oldEndVNode = oldChildren[--oldEndIdx];
@@ -1747,7 +1794,7 @@ define('magix', function (require) {
                         oc = oldChildren[oi++];
                     } while (oc && oc['p']);
                     nc = newChildren[i];
-                    compareKey = keyedNodes[nc['d']];
+                    compareKey = keyedNodes[nc['f']];
                     if (compareKey && (compareKey = compareKey.pop())) {
                         orn = compareKey['n'];
                         ovn = compareKey['o'];
@@ -1766,8 +1813,8 @@ define('magix', function (require) {
                         V_SetNode(nodes[i], realNode, oc, nc, ref, vframe, keys);
                     }
                     else if (oc) { //有旧节点，则更新
-                        if (keyedNodes[oc['d']] &&
-                            reused[oc['d']]) {
+                        if (keyedNodes[oc['f']] &&
+                            reused[oc['f']]) {
                             //oldChildren.splice(i, 0, nc);//插入一个占位符，在接下来的比较中才能一一对应
                             oldCount++;
                             oi--;
@@ -1794,7 +1841,7 @@ define('magix', function (require) {
         }
         else {
             ref.c = 1;
-            realNode.innerHTML = newVDOM['g'];
+            realNode.innerHTML = newVDOM['e'];
         }
     };
     var V_SetNode = function (realNode, oldParent, lastVDOM, newVDOM, ref, vframe, keys, hasMXV) {
@@ -1802,23 +1849,21 @@ define('magix', function (require) {
             if (oldParent.nodeName == 'TEMPLATE') {
                 console.error('unsupport template tag');
             }
-            if ((realNode.nodeName == '#text' && lastVDOM['f'] != '#text') || (realNode.nodeName != '#text' && realNode.nodeName.toLowerCase() != lastVDOM['f'])) {
-                console.error('Your code is not match the DOM tree generated by the browser. near:' + lastVDOM['g'] + '. Is that you lost some tags or modified the DOM tree?');
+            if ((realNode.nodeName == '#text' && lastVDOM['d'] != '#text') || (realNode.nodeName != '#text' && realNode.nodeName.toLowerCase() != lastVDOM['d'])) {
+                console.error('Your code is not match the DOM tree generated by the browser. near:' + lastVDOM['e'] + '. Is that you lost some tags or modified the DOM tree?');
             }
         }
         var lastAMap = lastVDOM['j'], newAMap = newVDOM['j'];
         if (V_SpecialDiff(realNode, lastVDOM, newVDOM) ||
             (hasMXV = G_Has(lastAMap, G_Tag_View_Key)) ||
             lastVDOM['c'] != newVDOM['c']) {
-            if (lastVDOM['f'] == newVDOM['f']) {
-                if (lastVDOM['f'] == V_TEXT_NODE) {
-                    if (lastVDOM['g'] != newVDOM['g']) {
-                        ref.c = 1;
-                        realNode.nodeValue = V_Unescape(newVDOM['g']);
-                    }
+            if (lastVDOM['d'] == newVDOM['d']) {
+                if (lastVDOM['d'] == V_TEXT_NODE) {
+                    ref.c = 1;
+                    realNode.nodeValue = V_Unescape(newVDOM['c']);
                 }
                 else if (!lastAMap[G_Tag_Key] || lastAMap[G_Tag_Key] != newAMap[G_Tag_Key]) {
-                    var newMxView = newAMap[G_MX_VIEW], newHTML = newVDOM['g'];
+                    var newMxView = newAMap[G_MX_VIEW], newHTML = newVDOM['e'];
                     var updateAttribute = !newAMap[G_Tag_Attr_Key] || lastAMap[G_Tag_Attr_Key] != newAMap[G_Tag_Attr_Key], updateChildren = void 0, unmountOld = void 0, oldVf = Vframe_Vframes[realNode.id], assign = void 0, view = void 0, uri = newMxView && G_ParseUri(newMxView), params = void 0, htmlChanged = void 0, deep = void 0, paramsChanged = void 0;
                     /*
                         如果存在新旧view，则考虑路径一致，避免渲染的问题
@@ -1834,7 +1879,7 @@ define('magix', function (require) {
                     if (newMxView && oldVf &&
                         oldVf['$h'] == uri[G_PATH] &&
                         (view = oldVf['$v'])) {
-                        htmlChanged = newHTML != lastVDOM['g'];
+                        htmlChanged = newHTML != lastVDOM['e'];
                         paramsChanged = newMxView != oldVf[G_PATH];
                         assign = lastAMap[G_Tag_View_Key];
                         deep = !view['$e'];
@@ -1934,7 +1979,7 @@ define('magix', function (require) {
             delete Body_RangeEvents[selfId];
             delete Body_RangeVframes[selfId];
             console.time('[updater time:' + selfId + ']');
-            vdom = tmpl(data, Q_Create, selfId);
+            vdom = tmpl(data, Q_Create, selfId, Q_Safeguard, Q_Encode, Q_EncodeURI, Q_Ref, Q_EncodeQ);
             V_SetChildNodes(node, updater['$d'], vdom, ref, vf, keys);
             updater['$d'] = vdom;
             for (var _i = 0, _a = ref.d; _i < _a.length; _i++) {
@@ -1964,7 +2009,7 @@ define('magix', function (require) {
      * @module updater
      * @param {String} viewId Magix.View对象Id
      */
-    var Updater = function (viewId) {
+    function Updater(viewId) {
         var me = this;
         me['$b'] = viewId;
         me['$c'] = 1;
@@ -1976,7 +2021,7 @@ define('magix', function (require) {
         me['$e'] = [];
         me['$k'] = {};
         var _a;
-    };
+    }
     G_Assign(Updater[G_PROTOTYPE], {
         /**
          * @lends Updater#
@@ -2267,13 +2312,13 @@ define('magix', function (require) {
      *      alert(e.type);//可通过type识别是哪种事件类型
      *  }
      */
-    var View = function (id, owner, ops, me) {
+    function View(id, owner, ops, me) {
         me = this;
         me.owner = owner;
         me.id = id;
         me['$b'] = 1; //标识view是否刷新过，对于托管的函数资源，在回调这个函数时，不但要确保view没有销毁，而且要确保view没有刷新过，如果刷新过则不回调
         me.updater = me['$a'] = new Updater(me.id);
-    };
+    }
     var ViewProto = View[G_PROTOTYPE];
     G_Assign(View, {
         /**
@@ -2342,11 +2387,11 @@ define('magix', function (require) {
             var me = this;
             props = props || {};
             var ctor = props.ctor;
-            var NView = function (d, a, b) {
+            function NView(d, a, b) {
                 me.call(this, d, a, b);
                 if (ctor)
                     ctor.call(this, b);
-            };
+            }
             NView.extend = me.extend;
             return G_Extend(NView, me, props, statics);
         }
