@@ -1,5 +1,5 @@
-'#snippet';
-'#exclude(define)';
+//#snippet;
+//#exclude=define;
 
 var define
 var require;

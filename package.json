@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "del": "",
-    "gulp": "",
+    "gulp": "3.9.1",
     "typescript": "",
     "gulp-watch": "",
     "gulp-uglify": ""

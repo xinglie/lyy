@@ -4,7 +4,7 @@
 '@./app/index.ts';
 
 (() => {
-    let Magix = require('magix');
+    let Magix = require('magix5');
     Magix.boot({
         defaultView: 'app/index'
     });

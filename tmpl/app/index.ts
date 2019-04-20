@@ -1,17 +1,17 @@
-'#snippet';
-let Magix = require('magix');
+//#snippet;
+let Magix = require('magix5');
 Magix.applyStyle('@index.sass');
 let N_LIST = [10, 20, 30, 50, 100];
 let ICONS = ['🐶', '☘️', '🍁', '🌷', '🌞', '🌹', '🌺', '🌸', '🌼', '🌴', '🐓', '🐘', '🦕', '🦖', '🐟', '🦀', '🦐', '🐸', '🐤', '🐜', '🐌', '🦋', '🐯', '🐿', '🐥', '🐼', '🐻', '🐭', '🦉', '🐺', '🐞', '🐚', '🐌', '🐳', '🐋', '🦈', '🐊', '🐫', '🐪', '🦍', '🦓', '🦒', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🐐', '🦌', '🐕', '🐩', '🐈', '🦃', '🕊', '🐇', '🐁', '🦔', '⛄️', '🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🥝', '🍅', '🥥', '🥑', '🍆', '🥔', '🥕', '🌽', '🌶', '🥒', '🥦', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🥨', '🥞', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🍳', '🍲', '🥣', '🥗', '🍿', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🍡', '🥟', '🥠', '🥡', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🥧', '🍫', '🍬', '🍭', '🍮', '🖋', '🖊', '🖌', '🖍', '⚽', '⚾', '🏀', '🏐', '🏈', '🏉', '🎾', '🚌', '🚍', '🚎', '🚐', '🚑', '🚒', '🚓', '🚔', '🚕', '🚖', '🚗', '🚘', '🚚', '🚛', '🚜', '🚲', '🛴', '🛵'];
 module.exports = Magix.View.extend({
     tmpl: '@index.html',
     ctor() {
-        this.updater.set({
+        this.set({
             n: 1
         });
     },
     '@{getExpr}'() {
-        let n = this.updater.get('n');
+        let n = this.get('n');
         let operate, answers = [], answer;
         let left, right, n_max = N_LIST[n];
         do {
@@ -54,7 +54,7 @@ module.exports = Magix.View.extend({
         let group = [];
         let locker = {};
         let i = 0, e, key;
-        let n = this.updater.get('n');
+        let n = this.get('n');
         let n_max = N_LIST[n], left, right;
         let minCount = 0, zeroCount = 0;
         while (i < count) {
@@ -86,7 +86,7 @@ module.exports = Magix.View.extend({
     },
     render() {
         let group = this['@{getGroup}'](20);
-        this.updater.digest({
+        this.digest({
             nList: N_LIST,
             group,
             current: 0
@@ -94,19 +94,19 @@ module.exports = Magix.View.extend({
     },
     '@{changeExpr}'(index) {
         clearTimeout(this['@{next.timer}']);
-        this.updater.digest({
+        this.digest({
             current: index
         });
     },
     '@{do}<click>'(e) {
-        let group = this.updater.get('group');
-        let current = this.updater.get('current');
+        let group = this.get('group');
+        let current = this.get('current');
         let expr = group[current];
         if (expr.userAnswer == -1) {
             let index = e.params.index;
             expr.userAnswer = expr.answers[index];
             expr.correct = expr.userAnswer == expr.answer;
-            this.updater.digest({
+            this.digest({
                 group
             });
             if (current < group.length + 1) {
@@ -125,14 +125,14 @@ module.exports = Magix.View.extend({
         this['@{changeExpr}'](e.params.index);
     },
     '@{prev}<click>'() {
-        let current = this.updater.get('current');
+        let current = this.get('current');
         if (current > 0) {
             this['@{changeExpr}'](current - 1);
         }
     },
     '@{next}<click>'() {
-        let group = this.updater.get('group');
-        let current = this.updater.get('current');
+        let group = this.get('group');
+        let current = this.get('current');
         if (current < group.length - 1) {
             this['@{changeExpr}'](current + 1);
         }
@@ -141,7 +141,7 @@ module.exports = Magix.View.extend({
         this.render();
     },
     '@{set.n.index}<change>'(e) {
-        this.updater.set({
+        this.set({
             n: e.eventTarget.selectedIndex
         });
         this.render();

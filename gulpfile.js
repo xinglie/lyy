@@ -7,13 +7,11 @@ var gulp = require('gulp');
 var watch = require('gulp-watch');
 var fs = require('fs');
 var ts = require('typescript');
-var combineTool = require('../magix-combine/index');
+var combineTool = require('../magix-composer/index');
 var del = require('del');
 
 
 combineTool.config({
-    magixUpdaterIncrement: true,
-    magixUpdaterQuick: true,
     tmplFolder: tmplFolder,
     srcFolder: srcFolder,
     cssSelectorPrefix: 'yy-',
@@ -21,7 +19,7 @@ combineTool.config({
         var str = ts.transpileModule(content, {
             compilerOptions: {
                 lib: ['es7'],
-                target: 'es3',
+                target: 'es6',
                 module: ts.ModuleKind.CommonJS
             }
         });
@@ -32,7 +30,7 @@ combineTool.config({
         var str = ts.transpileModule(content, {
             compilerOptions: {
                 lib: ['es7'],
-                target: 'es3',
+                target: 'es6',
                 module: ts.ModuleKind.None
             }
         });
@@ -57,7 +55,7 @@ gulp.task('watch', ['combine'], function () {
     });
 });
 
-var uglify = require('gulp-uglify');
+var uglify = require('../gulp-terser-scoped/index');
 gulp.task('cleanBuild', function () {
     return del(buildFolder);
 });
