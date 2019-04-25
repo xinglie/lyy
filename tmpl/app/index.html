@@ -6,7 +6,7 @@
         <div class="equal">= ?<span class="icon">{{=expr.icon}}</span></div>
     </div>
      <div class="answers">
-        <div each="{{expr.answers as an idx}}" class="an {{=expr.userAnswer != -1 ? (an == expr.userAnswer ? (expr.answer == an ? 'green' : 'red') : (an == expr.answer ? 'green' : '')) : ''}}" mx-click="@{do}({index:{{=idx}}})">{{=an}}<span class="icon">{{=expr.icon}}</span></div>
+        <div each="{{expr.answers as a i}}" class="an {{=expr.userAnswer != -1 ? (a == expr.userAnswer ? (expr.answer == a ? 'green' : 'red') : (a == expr.answer ? 'green' : '')) : ''}}" mx-click="@{do}({index:{{=i}}})">{{=a}}<span class="icon">{{=expr.icon}}</span></div>
     </div>
     <div class="cen">
         <button class="next" mx-click="@{prev}()">上一题</button>

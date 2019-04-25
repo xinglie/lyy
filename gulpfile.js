@@ -14,7 +14,7 @@ var del = require('del');
 combineTool.config({
     tmplFolder: tmplFolder,
     srcFolder: srcFolder,
-    cssSelectorPrefix: 'yy-',
+    projectName: 'yy',
     compileBeforeProcessor(content, e) {
         var str = ts.transpileModule(content, {
             compilerOptions: {
