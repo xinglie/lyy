@@ -52,7 +52,7 @@ gulp.task('cleanBuild', function () {
 });
 gulp.task('build', ['cleanBuild'], function () {
     combineTool.config({
-        compressCss: true
+        debug: false
     });
 
 
