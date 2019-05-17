@@ -1,0 +1,23 @@
+<div class="expr expr-ap clearfix">
+    {{let expr=group[current]}}
+    {{=expr.desc}}
+</div>
+<div class="answers clearfix">
+    <input type="number" class="input{{if expr.userAnswer!=-1}}{{if expr.correct}} border-green{{else}} border-red{{/if}}{{/if}}" mx-input="@{save.value}({expr:{{@expr}}})" value="{{=expr.temp}}" /><button class="submit" mx-click="@{save}({expr:{{@expr}}})">提交</button>
+</div>
+<div class="cen">
+    <button class="next" mx-click="@{prev}()">上一题</button>
+    <button class="next" mx-click="@{next}()">下一题</button>
+</div>
+<div class="cen clearfix">
+        <div qk:each="{{group as g i}}" class="index{{=i==current?' current-index':''}}{{=g.userAnswer!=-1?(g.correct?' green':' red'):''}}" mx-click="@{show}({index:{{=i}}})">{{=i+1}}</div>
+</div>
+<div class="cen">
+    <select class="g fs" mx-change="@{set.n.index}()">
+        {{each nList as num ni}}
+        <option selected="{{n==2*ni}}">{{=num}}以内加减应用题</option>
+        <option selected="{{n==2*ni+1}}">{{=num}}以内乘除应用题</option>
+        {{/each}}
+    </select>
+    <button class="next g" mx-click="@{group}()">换一组</button>
+</div>

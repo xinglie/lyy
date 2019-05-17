@@ -14,8 +14,10 @@ var del = require('del');
 combineTool.config({
     tmplFolder: tmplFolder,
     srcFolder: srcFolder,
-    projectName: 'yy',
-    compileBeforeProcessor(content, e) {
+    projectName: 'yy-',
+    debug:true,
+    tmplAddViewsToDependencies: false,
+    compileJSStart(content, e) {
         var str = ts.transpileModule(content, {
             compilerOptions: {
                 lib: ['es7'],
@@ -25,18 +27,7 @@ combineTool.config({
         });
         str = str.outputText;
         return str;
-    },
-    compileTmplCommand(content) {
-        var str = ts.transpileModule(content, {
-            compilerOptions: {
-                lib: ['es7'],
-                target: 'es6',
-                module: ts.ModuleKind.None
-            }
-        });
-        str = str.outputText;
-        return str;
-    },
+    }
 });
 
 gulp.task('cleanSrc', function () {

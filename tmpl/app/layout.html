@@ -1,0 +1,8 @@
+<div class="tabs">
+    <ul class="clearfix">
+        {{each views as v i}}
+        <li class="tab{{if i==active}} tab-active{{/if}}" mx-click="{{i!=active}}?@{active}({i:{{=i}}})">{{=v.text}}</li>
+        {{/each}}
+    </ul>
+</div>
+<mx-vframe src="{{=views[active].view}}"/>
