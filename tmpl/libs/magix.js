@@ -903,16 +903,16 @@ define('magix5', () => {
         };
     }
     let Updater_EM = {
-        '&': 'amp',
-        '<': 'lt',
-        '>': 'gt',
-        '"': '#34',
-        '\'': '#39',
-        '\`': '#96'
+        '&': '&#38;',
+        '<': '&#60;',
+        '>': '&#62;',
+        '"': '&#34;',
+        '\'': '&#39;',
+        '\`': '&#96;'
     };
     let Updater_ER = /[&<>"'\`]/g;
-    let Updater_Safeguard = v => Empty + (v == Null ? Empty : v);
-    let Updater_EncodeReplacer = m => `&${Updater_EM[m]};`;
+    let Updater_Safeguard = v => v == Null ? Empty : Empty + v;
+    let Updater_EncodeReplacer = m => Updater_EM[m];
     let Updater_Encode = v => Updater_Safeguard(v).replace(Updater_ER, Updater_EncodeReplacer);
     let Updater_UM = {
         '!': '%21',

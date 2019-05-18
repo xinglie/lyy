@@ -12,6 +12,8 @@ let Fillers = {
     job: ['跳绳', '做操', '写作业', '打太极', '吃饭'],
     plant: ["风信子", "紫罗兰", "长寿花", "牡丹", "向日葵", "菊花", "郁金香", "荷花", "水仙", "石蒜", "鹤望兰", "大花蕙兰", "番红花", "绿巨人", "吊兰", "勿忘我", "滴水观音", "君子兰", "文竹", "蝴蝶兰", "丹参", "肉苁蓉", "三色堇", "红掌", "龟背竹", "白花蛇舌草", "仙客来", "锁阳", "天竺葵", "白掌", "金心吊兰", "豆瓣绿", "虞美人", "野草莓", "雪绒花", "地黄", '桧柏', '白皮松', '杉木', '侧柏', '臭椿', '樟树', '雪松', '银桦', '柞树', '稠李', '椴树', '冷杉', '银桦', '滇杨', '拐枣', '油茶', '蓝按', '桑树', '垂柳', '刺槐', '银桦', '树柳', '桑树', '松树', '檀树', '桃树', '橡树', '杏树', '杨树', '棷树', '榆树', '樟树', '柞树'],
     i1: ['金币', '糖果', '香蕉', '苹果', '沙果', '海棠', '野樱莓', '枇杷', '欧楂', '山楂', '香梨', '雪梨', '温柏', '蔷薇果', '花楸', '哈密瓜', '香瓜', '白兰瓜', '刺角瓜', '金铃子', '火龙果', '黄龙果'].concat(ICONS),
+    i2: ['小狗', '小鸡', '小猫', '小兔', '小熊', '熊猫', '啄木鸟'],
+    color: ['红', '橙', '黄', '绿', '青', '蓝', '紫'],
     action: [{
         key: '种',
         value: '{f-plant<item>}'
@@ -39,7 +41,12 @@ let Templates = {
             };
         },
         templates: [
-            '{f-user<u1>}{f-action<a1>-key}了{n-left}个{ref-a1-value}，{f-name<u2>}{ref-a1-key}{n-right}个{ref-item}，{ref-u1}和{ref-u2}一共{ref-a1-key}了多少个{ref-item}？'
+            '{f-user<u1>}{f-action<a1>-key}了{n-left}个{ref-a1-value}，{f-name<u2>}{ref-a1-key}{n-right}个{ref-item}，{ref-u1}和{ref-u2}一共{ref-a1-key}了多少个{ref-item}？',
+            '{f-place<p1>}有{n-left}只{f-i2<a1>}，又来了{n-right}只{ref-a1}，{ref-p1}一共有多少只{ref-a1}？',
+            '{f-color<c2>}花比{f-color<c1>}花多{n-right}朵，{ref-c1}花有{n-left}朵，{ref-c2}花有多少朵？',
+            '{f-place}有{n-left}只{f-i2<a1>}，{f-i2<a2>}比{ref-a1}多{n-right}只，{ref-a2}有多少只？',
+            '{f-place<p1>}{n-left}只{f-i2<a1>}回家了，此时还有{n-right}只{ref-a1}，{ref-p1}原来有几只{ref-a1}？',
+            '{f-name<a1>}已经浇了{n-left}颗树，还有{n-right}颗没有浇，{ref-a1}一共要浇多少树？'
         ]
     }, {
         fn(max) {
@@ -68,7 +75,7 @@ let Templates = {
         },
         templates: [
             '一张课桌{n-total}元，比一张椅子贵{n-a1}元，一套课桌椅多少元？',
-            '王伯伯家养白兔{n-total}只，养的黑兔比白兔少{n-a1}只，王伯伯家一共养兔多少只？'
+            '{f-name<u1>}家养{f-i2<a1>}{n-total}只，养的{f-i2<a2>}比{ref-a1}少{n-a1}只，{ref-u1}家一共养{ref-a1}和{ref-a2}多少只？'
         ]
     }, {
         fn(max) {
@@ -95,7 +102,13 @@ let Templates = {
             };
         },
         templates: [
-            '{f-user<u1>}{f-action<a1>-key}了{n-count}个{ref-a1-value}，{f-name<u2>}比{ref-u1}少{ref-a1-key}{n-left}个{ref-item}，{ref-u2}{ref-a1-key}了多少个{ref-item}？'
+            '{f-user<u1>}{f-action<a1>-key}了{n-count}个{ref-a1-value}，{f-name<u2>}比{ref-u1}少{ref-a1-key}{n-left}个{ref-item}，{ref-u2}{ref-a1-key}了多少个{ref-item}？',
+            '{f-place<p1>}一共有{n-count}只{f-i2<a1>}，走了{n-left}只{ref-a1}后，{ref-p1}还有多少只{ref-a1}？',
+            '{f-name<u1>}借了{n-count}本书，今天还了{n-left}本后，{ref-u1}还有多少本书？',
+            '{f-name<u1>}有{n-count}张画，送给{f-name<u2>}一些后，还有{n-left}张，{ref-u1}送给{ref-u2}多少张？',
+            '{f-place<p1>}一共有{n-count}只{f-i2<a1>}和{f-i2<a2>}，{ref-a1}有{n-left}只，{ref-a2}有多少只？',
+            '商场运回{n-count}台电视，卖出一些后还有{n-left}台，卖出多少台电视？',
+            '一共有{n-count}颗树，{f-name<a1>}已经浇了{n-left}棵，{ref-a1}还要浇多少树？'
         ]
     }],
     '*': [{
@@ -173,7 +186,7 @@ let GetExpr = (index) => {
             break;
         }
     } while (!Templates[o]);
-    let fillers = {};
+    let fillers = {}, locker = {};
     desc = desc.replace(NumFillerReg, (_, key) => {
         return nums[key];
     });
@@ -181,7 +194,15 @@ let GetExpr = (index) => {
         FillerReg.lastIndex = 0;
         desc = desc.replace(FillerReg, (_, key, refName, sub) => {
             let list = Fillers[key];
-            let o = list[Math.floor(Math.random() * list.length)];
+            let i, o;
+            do {
+                i = Math.floor(Math.random() * list.length)
+                o = list[Math.floor(Math.random() * list.length)];
+                if (DEBUG && locker[key + '\x1f' + i]) {
+                    console.log('exist', i, key, locker, desc);
+                }
+            } while (locker[key + '\x1f' + i]);
+            locker[key + '\x1f' + i] = 1;
             if (refName) {
                 fillers[refName] = o;
             }
